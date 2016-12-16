@@ -17,6 +17,7 @@ func main() {
 	flagExample := flag.Bool("example", false, "just dump out an example versioninfo.json to stdout")
 	flagOut := flag.String("o", "resource.syso", "output file name")
 	flagIcon := flag.String("icon", "", "icon file name")
+	flagIconName := flag.String("icon-name", "", "icon resource name")
 	flagManifest := flag.String("manifest", "", "manifest file name")
 
 	flagComment := flag.String("comment", "", "StringFileInfo.Comments")
@@ -85,6 +86,9 @@ func main() {
 	// Override from flags
 	if *flagIcon != "" {
 		vi.IconPath = *flagIcon
+	}
+	if *flagIconName != "" {
+		vi.IconName = *flagIconName
 	}
 	if *flagManifest != "" {
 		vi.ManifestPath = *flagManifest

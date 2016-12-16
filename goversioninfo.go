@@ -34,6 +34,7 @@ type VersionInfo struct {
 	Buffer         bytes.Buffer
 	Structure      VSVersionInfo
 	IconPath       string
+	IconName       string
 	ManifestPath   string
 }
 
@@ -209,7 +210,13 @@ func (vi *VersionInfo) WriteSyso(filename string, arch string) error {
 
 	// If icon is enabled
 	if vi.IconPath != "" {
-		if err := addIcon(coff, vi.IconPath, newID); err != nil {
+		var err error
+		if vi.IconName == "" {
+			err = addIcon(coff, vi.IconPath, newID)
+		} else {
+			err = addNamedIcon(coff, vi.IconPath, vi.IconName, newID)
+		}
+		if err != nil {
 			return err
 		}
 	}

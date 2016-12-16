@@ -7,6 +7,9 @@ import (
 
 	"github.com/rakslice/rsrc/coff"
 	"github.com/rakslice/rsrc/ico"
+	"fmt"
+	"syscall"
+	"log"
 )
 
 // *****************************************************************************
@@ -56,6 +59,60 @@ func (group gRPICONDIR) Size() int64 {
 type gRPICONDIRENTRY struct {
 	ico.IconDirEntryCommon
 	ID uint16
+}
+
+func addStringGetIndex(curCoff *coff.Coff, rawString string) int {
+	// add string entry
+	newStringIndex := len(curCoff.DirStrings)
+
+	utf16s, err := syscall.UTF16FromString(rawString)
+	if err != nil {
+		log.Fatal(fmt.Sprintf("Error converting resource name string '%s': %s", rawString, err))
+	}
+
+	nonZeroRunesLen := len(utf16s) - 1
+
+	curCoff.DirStrings = append(curCoff.DirStrings, coff.DirString{uint16(nonZeroRunesLen), utf16s})
+
+	return newStringIndex
+}
+
+func addNamedIcon(curCoff *coff.Coff, fname string, resourceName string, newID <-chan uint16) error {
+	f, err := os.Open(fname)
+	if err != nil {
+		return err
+	}
+	//defer f.Close() don't defer, files will be closed by OS when app closes
+
+	icons, err := ico.DecodeHeaders(f)
+	if err != nil {
+		return err
+	}
+
+	if len(icons) > 0 {
+		// RT_ICONs
+		group := gRPICONDIR{ICONDIR: ico.ICONDIR{
+			Reserved: 0, // magic num.
+			Type:     1, // magic num.
+			Count:    uint16(len(icons)),
+		}}
+		for _, icon := range icons {
+			id := <-newID
+			r := io.NewSectionReader(f, int64(icon.ImageOffset), int64(icon.BytesInRes))
+			curCoff.AddResource(rtIcon, id, r)
+			group.Entries = append(group.Entries, gRPICONDIRENTRY{IconDirEntryCommon: icon.IconDirEntryCommon, ID: id})
+		}
+
+		fmt.Fprintf(os.Stderr, "icon group is %v\n", resourceName)
+		newStringIndex := addStringGetIndex(curCoff, resourceName)
+
+		// set id to string index
+		idOrName := uint32(newStringIndex) | coff.MASK_NAME
+
+		curCoff.AddResourceIdOrNameRef(rtGroupIcon, idOrName, group)
+	}
+
+	return nil
 }
 
 func addIcon(coff *coff.Coff, fname string, newID <-chan uint16) error {
