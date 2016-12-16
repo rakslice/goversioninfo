@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/akavel/rsrc/coff"
+	"github.com/rakslice/rsrc/coff"
 )
 
 // *****************************************************************************

@@ -12,8 +12,8 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/akavel/rsrc/binutil"
-	"github.com/akavel/rsrc/coff"
+	"github.com/rakslice/rsrc/binutil"
+	"github.com/rakslice/rsrc/coff"
 )
 
 // *****************************************************************************

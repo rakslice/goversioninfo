@@ -10,7 +10,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/josephspurrier/goversioninfo"
+	"github.com/rakslice/goversioninfo"
 )
 
 func main() {

@@ -5,8 +5,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/akavel/rsrc/coff"
-	"github.com/akavel/rsrc/ico"
+	"github.com/rakslice/rsrc/coff"
+	"github.com/rakslice/rsrc/ico"
 )
 
 // *****************************************************************************
